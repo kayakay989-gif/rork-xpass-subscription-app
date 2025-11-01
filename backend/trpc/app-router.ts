@@ -83,16 +83,19 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
 });
 
-console.log('[tRPC Router] Initialized with routes:', Object.keys(appRouter._def.procedures || appRouter));
-console.log('[tRPC Router] Available routers:', {
-  example: Object.keys(exampleRouter._def.procedures),
-  gyms: Object.keys(gymsRouter._def.procedures),
-  checkIns: Object.keys(checkInsRouter._def.procedures),
-  subscriptions: Object.keys(subscriptionsRouter._def.procedures),
-  users: Object.keys(usersRouter._def.procedures),
-  payments: Object.keys(paymentsRouter._def.procedures),
-  admin: Object.keys(adminRouter._def.procedures),
-  auth: Object.keys(authRouter._def.procedures),
-});
+console.log('[tRPC Router] Main router keys:', Object.keys(appRouter._def.procedures || {}));
+console.log('[tRPC Router] Auth router type:', typeof authRouter);
+console.log('[tRPC Router] Auth router procedures:', Object.keys(authRouter._def?.procedures || {}));
+console.log('[tRPC Router] Login procedure:', loginProcedure);
+console.log('[tRPC Router] Full app router:', JSON.stringify({
+  example: Object.keys(exampleRouter._def.procedures || {}),
+  gyms: Object.keys(gymsRouter._def.procedures || {}),
+  checkIns: Object.keys(checkInsRouter._def.procedures || {}),
+  subscriptions: Object.keys(subscriptionsRouter._def.procedures || {}),
+  users: Object.keys(usersRouter._def.procedures || {}),
+  payments: Object.keys(paymentsRouter._def.procedures || {}),
+  admin: Object.keys(adminRouter._def.procedures || {}),
+  auth: Object.keys(authRouter._def.procedures || {}),
+}, null, 2));
 
 export type AppRouter = typeof appRouter;
