@@ -6,8 +6,16 @@ import superjson from "superjson";
 export const trpc = createTRPCReact<AppRouter>();
 
 const getBaseUrl = () => {
-  if (process.env.EXPO_PUBLIC_RORK_API_BASE_URL) {
-    return process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
+  const baseUrl = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
+  
+  console.log('[tRPC] Environment:', {
+    baseUrl,
+    allEnvKeys: Object.keys(process.env).filter(key => key.includes('RORK')),
+  });
+  
+  if (baseUrl) {
+    console.log('[tRPC] Using base URL:', baseUrl);
+    return baseUrl;
   }
 
   throw new Error(
