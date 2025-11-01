@@ -24,49 +24,75 @@ import { registerProcedure } from "./routes/auth/register/route";
 import { loginProcedure } from "./routes/auth/login/route";
 import { googleLoginProcedure } from "./routes/auth/googleLogin/route";
 
-export const appRouter = createTRPCRouter({
-  example: createTRPCRouter({
-    hi: hiRoute,
-  }),
-  gyms: createTRPCRouter({
-    list: gymsList,
-    getById: gymsGetById,
-    getCheckIns: gymsGetCheckIns,
-    getPayments: gymsGetPayments,
-  }),
-  checkIns: createTRPCRouter({
-    create: checkInsCreate,
-    list: checkInsList,
-  }),
-  subscriptions: createTRPCRouter({
-    getCurrent: subscriptionsGetCurrent,
-    create: subscriptionsCreate,
-  }),
-  users: createTRPCRouter({
-    get: usersGet,
-    updateWallet: usersUpdateWallet,
-  }),
-  payments: createTRPCRouter({
-    createIntent: paymentsCreateIntent,
-    confirm: paymentsConfirm,
-  }),
-  admin: createTRPCRouter({
-    getAllUsers: adminGetAllUsers,
-    getAllCheckIns: adminGetAllCheckIns,
-    getAllGyms: adminGetAllGyms,
-    createGym: adminCreateGym,
-    deleteGym: adminDeleteGym,
-    getStats: adminGetStats,
-  }),
-  auth: createTRPCRouter({
-    sendOTP: sendOTPProcedure,
-    verifyOTP: verifyOTPProcedure,
-    register: registerProcedure,
-    login: loginProcedure,
-    googleLogin: googleLoginProcedure,
-  }),
+const exampleRouter = createTRPCRouter({
+  hi: hiRoute,
 });
 
-console.log('[tRPC Router] Initialized with routes:', Object.keys(appRouter._def.procedures || {}));
+const gymsRouter = createTRPCRouter({
+  list: gymsList,
+  getById: gymsGetById,
+  getCheckIns: gymsGetCheckIns,
+  getPayments: gymsGetPayments,
+});
+
+const checkInsRouter = createTRPCRouter({
+  create: checkInsCreate,
+  list: checkInsList,
+});
+
+const subscriptionsRouter = createTRPCRouter({
+  getCurrent: subscriptionsGetCurrent,
+  create: subscriptionsCreate,
+});
+
+const usersRouter = createTRPCRouter({
+  get: usersGet,
+  updateWallet: usersUpdateWallet,
+});
+
+const paymentsRouter = createTRPCRouter({
+  createIntent: paymentsCreateIntent,
+  confirm: paymentsConfirm,
+});
+
+const adminRouter = createTRPCRouter({
+  getAllUsers: adminGetAllUsers,
+  getAllCheckIns: adminGetAllCheckIns,
+  getAllGyms: adminGetAllGyms,
+  createGym: adminCreateGym,
+  deleteGym: adminDeleteGym,
+  getStats: adminGetStats,
+});
+
+const authRouter = createTRPCRouter({
+  sendOTP: sendOTPProcedure,
+  verifyOTP: verifyOTPProcedure,
+  register: registerProcedure,
+  login: loginProcedure,
+  googleLogin: googleLoginProcedure,
+});
+
+export const appRouter = createTRPCRouter({
+  example: exampleRouter,
+  gyms: gymsRouter,
+  checkIns: checkInsRouter,
+  subscriptions: subscriptionsRouter,
+  users: usersRouter,
+  payments: paymentsRouter,
+  admin: adminRouter,
+  auth: authRouter,
+});
+
+console.log('[tRPC Router] Initialized with routes:', Object.keys(appRouter._def.procedures || appRouter));
+console.log('[tRPC Router] Available routers:', {
+  example: Object.keys(exampleRouter._def.procedures),
+  gyms: Object.keys(gymsRouter._def.procedures),
+  checkIns: Object.keys(checkInsRouter._def.procedures),
+  subscriptions: Object.keys(subscriptionsRouter._def.procedures),
+  users: Object.keys(usersRouter._def.procedures),
+  payments: Object.keys(paymentsRouter._def.procedures),
+  admin: Object.keys(adminRouter._def.procedures),
+  auth: Object.keys(authRouter._def.procedures),
+});
 
 export type AppRouter = typeof appRouter;
