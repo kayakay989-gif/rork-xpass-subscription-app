@@ -1,8 +1,7 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Stack } from 'expo-router';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { useRouter, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, User, Mail, Phone, CreditCard, LogOut, Share2 } from 'lucide-react-native';
+import { ChevronRight, Lock, CreditCard, Bell, Gift, Globe, FileText, Shield, Edit } from 'lucide-react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApp } from '@/contexts/AppContext';
 import Colors from '@/constants/colors';
@@ -10,37 +9,16 @@ import Colors from '@/constants/colors';
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, logout, isGuest } = useAuth();
+  const { user } = useAuth();
   const { subscription } = useApp();
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-            router.replace('/splash');
-          },
-        },
-      ]
-    );
-  };
-
-  const handleShare = () => {
-    Alert.alert(
-      'Share Referral Code',
-      `Your referral code: ${user?.referralCode || 'N/A'}\n\nShare this code with friends to earn rewards!`,
-      [{ text: 'OK' }]
-    );
-  };
-
-  const getTierName = (tier: string): string => {
-    return tier.charAt(0).toUpperCase() + tier.slice(1);
+  const getRemainingDays = () => {
+    if (!subscription) return 0;
+    const now = new Date();
+    const end = new Date(subscription.endDate);
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
   };
 
   return (
@@ -48,117 +26,150 @@ export default function ProfileScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <ArrowLeft size={24} color={Colors.text} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <View style={{ width: 40 }} />
+          <Image 
+            source={{ uri: 'https://pub-e001eb4506b145aa938b5d3badbff6a5.r2.dev/attachments/t5u7px23rxplxx8gfxveq' }}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <View style={styles.headerRight}>
+            <Text style={styles.greeting}>Hello {user?.name?.split(' ')[0] || 'Hamza'}</Text>
+            <View style={styles.iconsContainer}>
+              <View style={styles.languageButton}>
+                <Text style={styles.languageText}>EN</Text>
+              </View>
+              <View style={styles.profileButton}>
+                <Text style={styles.profileIcon}>👤</Text>
+              </View>
+            </View>
+          </View>
         </View>
 
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-          <View style={styles.profileSection}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <User size={48} color={Colors.white} />
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Profile</Text>
+            {subscription && (
+              <View style={styles.memberBadge}>
+                <Text style={styles.memberText}>Member</Text>
               </View>
-            </View>
-            <Text style={styles.userName}>{user?.name || 'Guest User'}</Text>
-            {!isGuest && user?.email && (
-              <Text style={styles.userEmail}>{user.email}</Text>
             )}
           </View>
 
-          {!isGuest && subscription && (
-            <View style={styles.subscriptionCard}>
-              <Text style={styles.cardTitle}>Active Subscription</Text>
-              <View style={styles.subscriptionDetails}>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Tier</Text>
-                  <Text style={styles.detailValue}>{getTierName(subscription.tier)}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Visits Used</Text>
-                  <Text style={styles.detailValue}>
-                    {subscription.visitsUsed} / {subscription.maxVisitsPerMonth}
+          <View style={styles.profileCard}>
+            <View style={styles.profileInfo}>
+              <Image
+                source={{ uri: 'https://i.pravatar.cc/300?u=' + (user?.email || 'default') }}
+                style={styles.avatar}
+              />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>{user?.name || 'Omar Khalid'}</Text>
+                <Text style={styles.userPhone}>{user?.phone || '+962 79 555 1234'} •</Text>
+                <Text style={styles.userEmail}>{user?.email || 'omar@email.com'}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.editButton}>
+              <Edit size={16} color={Colors.text} />
+              <Text style={styles.editText}>Edit</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.sectionTitle}>Account</Text>
+
+          <View style={styles.menuCard}>
+            <TouchableOpacity style={styles.menuItem}>
+              <Lock size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Security</Text>
+                <Text style={styles.menuSubtitle}>Phone OTP</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem}>
+              <CreditCard size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Payment Methods</Text>
+                <Text style={styles.menuSubtitle}>Apple Pay • Visa</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem}>
+              <Bell size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Notifications</Text>
+                <Text style={styles.menuSubtitle}>Push • SMS</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem}>
+              <Gift size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Refer a friend</Text>
+                <Text style={styles.menuSubtitle}>Earn 10 JDS Credit</Text>
+              </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.sectionTitle}>XPASS</Text>
+
+          <View style={styles.menuCard}>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => router.push('/my-subscription')}
+            >
+              <View style={styles.subscriptionIcon}>
+                <Text style={styles.subscriptionIconText}>📋</Text>
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>My Subscriptions</Text>
+                {subscription ? (
+                  <Text style={styles.menuSubtitle}>
+                    Active: expires in {getRemainingDays()} days
                   </Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>Valid Until</Text>
-                  <Text style={styles.detailValue}>
-                    {new Date(subscription.endDate).toLocaleDateString()}
-                  </Text>
-                </View>
+                ) : (
+                  <Text style={styles.menuSubtitle}>No active subscription</Text>
+                )}
               </View>
-            </View>
-          )}
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
 
-          {!isGuest && user && (
-            <View style={styles.infoCard}>
-              <Text style={styles.cardTitle}>Personal Information</Text>
-              
-              <View style={styles.infoItem}>
-                <View style={styles.infoIconContainer}>
-                  <Mail size={20} color={Colors.primary} />
-                </View>
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Email</Text>
-                  <Text style={styles.infoValue}>{user.email || 'Not provided'}</Text>
-                </View>
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem}>
+              <Globe size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Language</Text>
               </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
 
-              <View style={styles.infoItem}>
-                <View style={styles.infoIconContainer}>
-                  <Phone size={20} color={Colors.primary} />
-                </View>
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Phone</Text>
-                  <Text style={styles.infoValue}>{user.phone || 'Not provided'}</Text>
-                </View>
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem}>
+              <FileText size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Terms & Conditions</Text>
               </View>
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
 
-              <View style={styles.infoItem}>
-                <View style={styles.infoIconContainer}>
-                  <CreditCard size={20} color={Colors.primary} />
-                </View>
-                <View style={styles.infoContent}>
-                  <Text style={styles.infoLabel}>Wallet Balance</Text>
-                  <Text style={styles.infoValue}>{user.walletBalance || 0} JOD</Text>
-                </View>
+            <View style={styles.divider} />
+
+            <TouchableOpacity style={styles.menuItem}>
+              <Shield size={20} color={Colors.text} />
+              <View style={styles.menuContent}>
+                <Text style={styles.menuTitle}>Privacy Policy</Text>
               </View>
-            </View>
-          )}
-
-          {!isGuest && user?.referralCode && (
-            <View style={styles.referralCard}>
-              <Text style={styles.cardTitle}>Referral Code</Text>
-              <View style={styles.referralCodeContainer}>
-                <Text style={styles.referralCode}>{user.referralCode}</Text>
-              </View>
-              <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-                <Share2 size={20} color={Colors.white} />
-                <Text style={styles.shareButtonText}>Share Code</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <View style={styles.actionsSection}>
-            {isGuest ? (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => router.push('/login')}
-              >
-                <User size={20} color={Colors.white} />
-                <Text style={styles.actionButtonText}>Login / Register</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={[styles.actionButton, styles.logoutButton]}
-                onPress={handleLogout}
-              >
-                <LogOut size={20} color={Colors.white} />
-                <Text style={styles.actionButtonText}>Logout</Text>
-              </TouchableOpacity>
-            )}
+              <ChevronRight size={20} color={Colors.textSecondary} />
+            </TouchableOpacity>
           </View>
         </ScrollView>
       </View>
@@ -169,177 +180,181 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F9FAFB',
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  backButton: {
-    padding: 8,
+  logo: {
+    width: 40,
+    height: 40,
   },
-  headerTitle: {
-    fontSize: 18,
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  greeting: {
+    fontSize: 16,
     fontWeight: '600' as const,
     color: Colors.text,
+  },
+  iconsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  languageButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.black,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  languageText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: '700' as const,
+  },
+  profileButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.black,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileIcon: {
+    fontSize: 18,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
-  profileSection: {
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 12,
   },
-  avatarContainer: {
-    marginBottom: 16,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: Colors.text,
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  memberBadge: {
+    backgroundColor: Colors.black,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  memberText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: '600' as const,
+  },
+  profileCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: Colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 16,
+  },
+  userInfo: {
+    flex: 1,
   },
   userName: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: '700' as const,
     color: Colors.text,
     marginBottom: 4,
+  },
+  userPhone: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
   userEmail: {
     fontSize: 14,
     color: Colors.textSecondary,
   },
-  subscriptionCard: {
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  editText: {
+    fontSize: 14,
+    color: Colors.text,
+    fontWeight: '500' as const,
+  },
+  menuCard: {
     backgroundColor: Colors.white,
     borderRadius: 16,
     padding: 20,
-    marginBottom: 16,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  infoCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    marginBottom: 16,
-  },
-  subscriptionDetails: {
-    gap: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.text,
-  },
-  infoItem: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    paddingVertical: 12,
   },
-  infoIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: Colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  infoContent: {
+  menuContent: {
     flex: 1,
+    marginLeft: 16,
   },
-  infoLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+  menuTitle: {
+    fontSize: 16,
+    fontWeight: '500' as const,
+    color: Colors.text,
     marginBottom: 2,
   },
-  infoValue: {
-    fontSize: 15,
-    fontWeight: '600' as const,
-    color: Colors.text,
+  menuSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
-  referralCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginVertical: 4,
   },
-  referralCodeContainer: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  referralCode: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: Colors.text,
-    letterSpacing: 2,
-  },
-  shareButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+  subscriptionIcon: {
+    width: 20,
+    height: 20,
     justifyContent: 'center',
-    gap: 8,
-  },
-  shareButtonText: {
-    fontSize: 15,
-    fontWeight: '600' as const,
-    color: Colors.white,
-  },
-  actionsSection: {
-    marginTop: 8,
-  },
-  actionButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
   },
-  logoutButton: {
-    backgroundColor: '#EF4444',
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: Colors.white,
+  subscriptionIconText: {
+    fontSize: 18,
   },
 });

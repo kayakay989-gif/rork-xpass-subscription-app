@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { CheckCircle, XCircle } from 'lucide-react-native';
+
 import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Colors from '@/constants/colors';
@@ -11,7 +11,6 @@ export default function QRScanScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<boolean>(false);
-  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const { checkIn } = useApp();
   const { isGuest } = useAuth();
   const { subscription } = useApp();
@@ -63,12 +62,13 @@ export default function QRScanScreen() {
     const gymId = data.replace('xpass-gym-', '');
     const checkInResult = await checkIn(gymId);
     
-    setResult(checkInResult);
+    if (checkInResult.success) {
+      router.push('/qr-success');
+    } else {
+      router.push('/qr-error');
+    }
     
-    setTimeout(() => {
-      setScanned(false);
-      setResult(null);
-    }, 2000);
+    setScanned(false);
   };
 
   return (
@@ -100,21 +100,7 @@ export default function QRScanScreen() {
           </View>
         </View>
 
-        {result && (
-          <View style={styles.resultOverlay}>
-            <View style={[
-              styles.resultCard,
-              result.success ? styles.successCard : styles.errorCard
-            ]}>
-              {result.success ? (
-                <CheckCircle size={48} color={Colors.success} />
-              ) : (
-                <XCircle size={48} color={Colors.error} />
-              )}
-              <Text style={styles.resultText}>{result.message}</Text>
-            </View>
-          </View>
-        )}
+
       </CameraView>
     </View>
   );
@@ -220,33 +206,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600' as const,
     color: Colors.white,
-  },
-  resultOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  resultCard: {
-    backgroundColor: Colors.white,
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    marginHorizontal: 40,
-  },
-  successCard: {
-    borderWidth: 2,
-    borderColor: Colors.success,
-  },
-  errorCard: {
-    borderWidth: 2,
-    borderColor: Colors.error,
-  },
-  resultText: {
-    fontSize: 18,
-    fontWeight: '600' as const,
-    color: Colors.text,
-    marginTop: 16,
-    textAlign: 'center',
   },
 });
